@@ -1,0 +1,48 @@
+# Unified Configuration for JIGSAWS
+# Uses dual-branch attribution (positive + negative) without PSNet
+
+# Basic settings
+bs_train: 8
+bs_test: 1
+workers: 4
+max_epoch: 200
+
+# Model settings
+pretrained_i3d_weight: './data/rgb_i3d_pretrained.pt'
+voter_number: 10
+
+# Dataset settings
+data_root: 'D:\datasets\JIGSAWS\jigsaws_frames\jigsaws_frames'
+jigsaws_info_dir: './data/info'
+jigsaws_task: 'Suturing'  # Options: 'Suturing', 'Needle_Passing', 'Knot_Tying'
+jigsaws_fold: 0  # Cross-validation fold: 0, 1, 2, 3
+frame_length: 160
+seed: 0
+
+# statistics of dataset
+label_max: 30
+label_min: 6
+judge_max: 5
+judge_min: 1
+
+# Optimizer settings
+optimizer: 'Adam'
+weight_decay: 0
+base_lr: 0.001
+lr_factor: 0.1
+
+# Dual-branch attribution hyperparameters
+lambda_pos: 1              # Weight for positive quality contribution
+lambda_neg: 0.5              # Weight for negative quality contribution
+weight_attribution: 1      # Weight for total attribution regularization
+weight_orthogonality: 0.1    # Weight for orthogonality loss
+weight_sparsity: 0.01        # Weight for sparsity loss
+weight_smoothness: 0.001     # Weight for smoothness loss
+weight_global_contrastive: 0.1 # Weight for global contrastive regression loss
+weight_pairwise_ranking: 0.1   # Weight for pairwise ranking loss
+
+attribution_start_epoch: 20  # Epoch to start applying attribution losses
+
+# Other settings
+print_freq: 10
+fix_bn: False

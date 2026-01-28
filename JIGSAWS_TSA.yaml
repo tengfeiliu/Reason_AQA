@@ -1,0 +1,33 @@
+# basic setting
+bs_train : 8
+bs_test : 1
+workers : 4
+max_epoch : 200
+
+# model setting
+pretrained_i3d_weight : './data/model_rgb.pth'
+voter_number : 10
+
+# dataset setting
+data_root : 'D:\datasets\JIGSAWS\frames'
+jigsaws_info_dir : './Annotations/JIGSAWS'
+jigsaws_task : 'Suturing'  # Options: 'Suturing', 'Needle_Passing', 'Knot_Tying'
+jigsaws_fold : 0  # Cross-validation fold: 0, 1, 2, 3
+frame_length : 96
+seed : 0
+
+# optimizer setting
+optimizer: 'Adam'
+weight_decay : 0
+base_lr : 0.001
+lr_factor : 0.1
+
+# positive attribution hyperparameters (for datasets without segmentation)
+lambda_pos : 0.1              # Weight for positive quality contribution
+lambda_sparsity : 0.01        # Weight for sparsity loss
+lambda_concentration : 0.01   # Weight for concentration loss
+lambda_smoothness : 0.001     # Weight for smoothness loss
+
+# others
+print_freq : 10
+fix_bn : False

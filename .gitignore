@@ -1,0 +1,10 @@
+logs/
+experiments/
+*.pth
+*.pt
+*.ckpt
+*.log
+*.npy
+*.npz
+__pycache__/
+*.pyc

@@ -1,0 +1,36 @@
+# basic setting
+bs_train : 8
+bs_test : 1
+workers : 4
+step_per_update: 2
+max_epoch : 200
+
+
+# model setting
+pretrained_i3d_weight : './data/model_rgb.pth'
+RT_depth : 5
+score_range : 100
+voter_number : 10
+
+# dataset setting
+data_root : 'D:\datasets\Seven\Seven'
+frame_length : 96
+seed : 0
+class_idx : 1  # 1: diving, 2: gym_vault, 3: ski_big_air, 4: snowboard_big_air, 5: sync_diving_3m, 6: sync_diving_10m
+
+# optimizer setting
+optimizer: 'Adam'
+weight_decay : 0
+base_lr : 0.001
+lr_factor : 0.1
+
+# positive attribution hyperparameters (for datasets without segmentation)
+lambda_pos : 0.1              # Weight for positive quality contribution
+lambda_sparsity : 0.01        # Weight for sparsity loss
+lambda_concentration : 0.01   # Weight for concentration loss
+lambda_smoothness : 0.001     # Weight for smoothness loss
+
+# others
+print_freq : 10
+fix_bn : False
+

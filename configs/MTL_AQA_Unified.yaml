@@ -1,0 +1,49 @@
+# Unified Configuration for MTL-AQA
+# Uses dual-branch attribution (positive + negative) without PSNet
+
+# Basic settings
+bs_train: 3
+bs_test: 1
+workers: 4
+max_epoch: 200
+
+# Model settings
+pretrained_i3d_weight: './data/model_rgb.pth'
+score_range: 30
+voter_number: 3
+
+# Dataset settings
+data_root: 'D:\datasets\MTL\MTL_frames'
+label_path: './Annotations/MTL-AQA/info/final_annotations_dict_with_dive_number.pkl'
+train_split: './Annotations/MTL-AQA/info/train_split_0.pkl'
+test_split: './Annotations/MTL-AQA/info/test_split_0.pkl'
+dive_number_choosing: False
+usingDD: True
+action_number_choosing: False
+frame_length: 103
+seed: 0
+temporal_shift_min: -3
+temporal_shift_max: 3
+temporal_aug: 6
+
+# Optimizer settings
+optimizer: 'Adam'
+weight_decay: 0
+base_lr: 0.001
+lr_factor: 0.1
+
+# Dual-branch attribution hyperparameters
+lambda_pos: 1              # Weight for positive quality contribution
+lambda_neg: 0.5              # Weight for negative quality contribution
+weight_attribution: 1      # Weight for total attribution regularization
+weight_orthogonality: 0.1    # Weight for orthogonality loss
+weight_sparsity: 0.01        # Weight for sparsity loss
+weight_smoothness: 0.001     # Weight for smoothness loss
+weight_global_contrastive: 0.1 # Weight for global contrastive regression loss
+weight_pairwise_ranking: 0.1   # Weight for pairwise ranking loss
+
+attribution_start_epoch: 20  # Epoch to start applying attribution losses
+
+# Other settings
+print_freq: 40
+fix_bn: False

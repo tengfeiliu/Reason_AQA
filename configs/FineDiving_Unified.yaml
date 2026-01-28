@@ -1,0 +1,43 @@
+# Unified Configuration for FineDiving
+# Uses dual-branch attribution (positive + negative) without PSNet
+
+# Basic settings
+bs_train: 8
+bs_test: 1
+workers: 2
+max_epoch: 200
+
+# Model settings
+pretrained_i3d_weight: 'models/model_rgb.pth'
+
+# Dataset settings
+data_root: 'D:/datasets/Released_FineDiving_Dataset/Released_FineDiving_Dataset/Trimmed_Video_Frames/FineDiving_Trimmed_VideoFrames/FINADiving_MTL_256s'
+label_path: 'D:/datasets/Released_FineDiving_Dataset/Released_FineDiving_Dataset/Annotations/fine-grained_annotation_aqa.pkl'
+train_split: 'D:/datasets/Released_FineDiving_Dataset/Released_FineDiving_Dataset/train_test_split/train_split.pkl'
+test_split: 'D:/datasets/Released_FineDiving_Dataset/Released_FineDiving_Dataset/train_test_split/test_split.pkl'
+
+# Optimizer settings
+optimizer: 'Adam'
+weight_decay: 0
+base_lr: 0.001
+lr_factor: 0.1
+
+# Dual-branch attribution hyperparameters
+lambda_pos: 1              # Weight for positive quality contribution
+lambda_neg: 0.5              # Weight for negative quality contribution
+weight_attribution: 1      # Weight for total attribution regularization
+weight_orthogonality: 0.1    # Weight for orthogonality loss
+weight_sparsity: 0.01        # Weight for sparsity loss
+weight_smoothness: 0.001     # Weight for smoothness loss
+weight_global_contrastive: 0.1 # Weight for global contrastive regression loss
+weight_pairwise_ranking: 0.1   # Weight for pairwise ranking loss
+
+attribution_start_epoch: 20  # Epoch to start applying attribution losses
+# Other settings
+seed: 0
+frame_length: 96
+voter_number: 10
+print_freq: 40
+fix_bn: False
+random_choosing: False
+action_number_choosing: True
