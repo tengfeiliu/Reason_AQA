@@ -118,9 +118,9 @@ def unified_network_forward_train(
 
     # Modified score: base_score + lambda_pos * pos_contribution - lambda_neg * neg_contribution
     # For contrastive regression, we compute the delta
-    score_1 = pos_delta[:pos_delta.shape[0]//2] + label_2_score + \
+    score_1 = pos_delta[:pos_delta.shape[0]//2] \
                - lambda_neg * neg_delta[:neg_delta.shape[0]//2]
-    score_2 = pos_delta[pos_delta.shape[0]//2:] + label_1_score + \
+    score_2 = pos_delta[pos_delta.shape[0]//2:] \
                - lambda_neg * neg_delta[neg_delta.shape[0]//2:]
 
     # Compute loss
@@ -251,7 +251,7 @@ def unified_network_forward_test(
         lambda_neg = getattr(args, 'lambda_neg', 0.1)
 
         # Modified score
-        score = pos_delta[:pos_delta.shape[0]//2] + label_2_score + \
+        score = pos_delta[:pos_delta.shape[0]//2] \
                - lambda_neg * neg_delta[:neg_delta.shape[0]//2]
 
     pred_scores.extend([i.item() / len(video_2_list) for i in score])

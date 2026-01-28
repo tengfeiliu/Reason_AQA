@@ -167,6 +167,11 @@ class AttributionBranch(nn.Module):
         self.conv4 = nn.Conv1d(hidden_dim // 2, hidden_dim // 2, kernel_size=3, padding=1)
         self.bn4 = nn.BatchNorm1d(hidden_dim // 2)
         self.relu = nn.ReLU(inplace=True)
+
+        self.conv5 = nn.Conv1d(hidden_dim // 2, hidden_dim // 2, kernel_size=3, padding=1)
+        self.bn5 = nn.BatchNorm1d(hidden_dim // 2)
+        self.relu = nn.ReLU(inplace=True)
+
         
 
         # Attribution head - outputs scalar per timestep
@@ -212,6 +217,10 @@ class AttributionBranch(nn.Module):
 
         x = self.conv4(x)
         x = self.bn4(x)
+        x = self.relu(x)
+
+        x = self.conv5(x)
+        x = self.bn5(x)
         x = self.relu(x)
 
         # Attribution signal [B, 1, T]
