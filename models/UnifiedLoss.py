@@ -142,6 +142,7 @@ class UnifiedAQALoss(nn.Module):
         # 3. Compute weighted total loss
         if epoch < self.attribution_start_epoch:
             # Only regression loss in early epochs
+            # print(self.weight_regression)
             total_loss = self.weight_regression * loss_reg
         else:
             total_loss = (
@@ -297,7 +298,7 @@ class PairwiseRankingLoss(nn.Module):
 
     def __init__(
         self,
-        margin: float = 1.0,
+        margin: float = 2.0,
         reduction: str = 'mean',
         min_score_diff: float = 1e-6
     ):

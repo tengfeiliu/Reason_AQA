@@ -10,7 +10,7 @@ def get_args():
     parser.add_argument('--resume', action='store_true', default=False ,help = 'resume training (interrupted by accident)')
     parser.add_argument('--sync_bn', type=bool, default=False)
     parser.add_argument('--fix_bn', type=bool, default=True)
-    parser.add_argument('--gpu', type=str, default='0')
+    parser.add_argument('--gpu', type=str, default='1')
     parser.add_argument('--test', action='store_true', default=False)
     parser.add_argument('--ckpts', type=str, default=None, help='test used ckpt path')
     args = parser.parse_args()

@@ -5,7 +5,7 @@
 bs_train: 8
 bs_test: 1
 workers: 4
-max_epoch: 200
+max_epoch: 400
 
 # Model settings
 pretrained_i3d_weight: './data/model_rgb.pth'
@@ -13,7 +13,7 @@ score_range: 100
 voter_number: 10
 
 # Dataset settings
-data_root: 'D:\datasets\Seven\Seven'
+data_root: '/data/ltf/datasets/Seven/Seven/Seven'
 frame_length: 103
 seed: 0
 class_idx: 1  # 1: diving, 2: gym_vault, 3: ski_big_air, 4: snowboard_big_air, 5: sync_diving_3m, 6: sync_diving_10m
@@ -27,14 +27,15 @@ lr_factor: 0.1
 # Dual-branch attribution hyperparameters
 lambda_pos: 1              # Weight for positive quality contribution
 lambda_neg: 0.5              # Weight for negative quality contribution
+weight_regression: 1        # Weight for regression loss
 weight_attribution: 1      # Weight for total attribution regularization
-weight_orthogonality: 0.1    # Weight for orthogonality loss
+weight_orthogonality: 0.5    # Weight for orthogonality loss
 weight_sparsity: 0.01        # Weight for sparsity loss
-weight_smoothness: 0.01     # Weight for smoothness loss
-weight_global_contrastive: 0.1 # Weight for global contrastive regression loss
-weight_pairwise_ranking: 0.1   # Weight for pairwise ranking loss
+weight_smoothness: 0.1     # Weight for smoothness loss
+weight_global_contrastive: 0.5 # Weight for global contrastive regression loss
+weight_pairwise_ranking: 0.5   # Weight for pairwise ranking loss
 
-attribution_start_epoch: 20  # Epoch to start applying attribution losses
+attribution_start_epoch: 50  # Epoch to start applying attribution losses
 
 # Other settings
 print_freq: 10
