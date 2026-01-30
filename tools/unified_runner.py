@@ -39,7 +39,7 @@ def unified_train_net(args):
     )
 
     # Build model
-    base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution, criterion = \
+    base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution, criterion = \
         unified_builder.unified_model_builder(args)
 
     # CUDA
@@ -56,7 +56,7 @@ def unified_train_net(args):
 
     # Build optimizer
     optimizer, scheduler = unified_builder.build_opti_sche(
-        base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution, args
+        base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution, args
     )
 
     # Initialize training state
@@ -71,7 +71,7 @@ def unified_train_net(args):
     if args.resume:
         start_epoch, epoch_best_aqa, rho_best, L2_min, RL2_min = \
             unified_builder.resume_train(
-                base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+                base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
                 optimizer, args
             )
         print('resume ckpts @ %d epoch(rho = %.4f, L2 = %.4f , RL2 = %.4f)'
@@ -81,7 +81,8 @@ def unified_train_net(args):
     base_model = nn.DataParallel(base_model)
     pos_decoder = nn.DataParallel(pos_decoder)
     neg_decoder = nn.DataParallel(neg_decoder)
-    regressor_delta = nn.DataParallel(regressor_delta)
+    pos_regressor_delta = nn.DataParallel(pos_regressor_delta)
+    neg_regressor_delta = nn.DataParallel(neg_regressor_delta)
     dual_attribution = nn.DataParallel(dual_attribution)
 
     # Training loop
@@ -108,7 +109,7 @@ def unified_train_net(args):
 
             # Forward pass
             unified_helper.unified_network_forward_train(
-                base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+                base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
                 pred_scores, video_1, label_1_score, video_2, label_2_score,
                 criterion, optimizer, epoch, idx+1, len(train_dataloader), args
             )
@@ -126,7 +127,7 @@ def unified_train_net(args):
 
         # Validation
         unified_validate(
-            base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+            base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
             test_dataloader, epoch, optimizer, args
         )
 
@@ -146,7 +147,7 @@ def unified_train_net(args):
 
 
 def unified_validate(
-    base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+    base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
     test_dataloader, epoch, optimizer, args
 ):
     """
@@ -163,7 +164,8 @@ def unified_validate(
     base_model.eval()
     pos_decoder.eval()
     neg_decoder.eval()
-    regressor_delta.eval()
+    pos_regressor_delta.eval()
+    neg_regressor_delta.eval()
     dual_attribution.eval()
 
     batch_num = len(test_dataloader)
@@ -180,7 +182,7 @@ def unified_validate(
 
             # Forward pass
             unified_helper.unified_network_forward_test(
-                base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+                base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
                 pred_scores, video_1, video_2_list, label_2_score_list, args
             )
 
@@ -208,7 +210,7 @@ def unified_validate(
             print('-----New best found!-----')
             unified_helper.save_outputs(pred_scores, true_scores, args)
             unified_helper.save_checkpoint(
-                base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+                base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
                 optimizer, epoch, epoch_best_aqa, rho_best, L2_min, RL2_min,
                 'best', args
             )
@@ -231,12 +233,12 @@ def unified_test_net(args):
     )
 
     # Build model
-    base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution, criterion = \
+    base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution, criterion = \
         unified_builder.unified_model_builder(args)
 
     # Load checkpoint
     unified_builder.load_model(
-        base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution, args
+        base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution, args
     )
 
     # CUDA
@@ -246,7 +248,8 @@ def unified_test_net(args):
         base_model = base_model.cuda()
         pos_decoder = pos_decoder.cuda()
         neg_decoder = neg_decoder.cuda()
-        regressor_delta = regressor_delta.cuda()
+        pos_regressor_delta = pos_regressor_delta.cuda()
+        neg_regressor_delta = neg_regressor_delta.cuda()
         dual_attribution = dual_attribution.cuda()
         torch.backends.cudnn.benchmark = True
 
@@ -254,18 +257,19 @@ def unified_test_net(args):
     base_model = nn.DataParallel(base_model)
     pos_decoder = nn.DataParallel(pos_decoder)
     neg_decoder = nn.DataParallel(neg_decoder)
-    regressor_delta = nn.DataParallel(regressor_delta)
+    pos_regressor_delta = nn.DataParallel(pos_regressor_delta)
+    neg_regressor_delta = nn.DataParallel(neg_regressor_delta)
     dual_attribution = nn.DataParallel(dual_attribution)
 
     # Test
     unified_test(
-        base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+        base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
         test_dataloader, args
     )
 
 
 def unified_test(
-    base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+    base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
     test_dataloader, args
 ):
     """
@@ -280,7 +284,8 @@ def unified_test(
     base_model.eval()
     pos_decoder.eval()
     neg_decoder.eval()
-    regressor_delta.eval()
+    pos_regressor_delta.eval()
+    neg_regressor_delta.eval()
     dual_attribution.eval()
 
     batch_num = len(test_dataloader)
@@ -297,7 +302,7 @@ def unified_test(
 
             # Forward pass
             unified_helper.unified_network_forward_test(
-                base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+                base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
                 pred_scores, video_1, video_2_list, label_2_score_list, args
             )
 

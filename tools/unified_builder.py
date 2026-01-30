@@ -71,7 +71,8 @@ def unified_model_builder(args):
     neg_decoder = decoder_fuser(dim=1024, num_heads=8, num_layers=3)
 
     # Regressor
-    regressor_delta = MLP_score(in_channel=1024, out_channel=1)
+    pos_regressor_delta = MLP_score(in_channel=1024, out_channel=1)
+    neg_regressor_delta = MLP_score(in_channel=1024, out_channel=1)
 
     # Dual-branch attribution
     dual_attribution = DualBranchAttribution(
@@ -94,17 +95,18 @@ def unified_model_builder(args):
         attribution_start_epoch=getattr(args, 'attribution_start_epoch', 20)
     )
 
-    return base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution, criterion
+    return base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution, criterion
 
 
-def build_opti_sche(base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution, args):
+def build_opti_sche(base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution, args):
     """Build optimizer and scheduler."""
     if args.optimizer == 'Adam':
         optimizer = optim.Adam([
             {'params': base_model.parameters(), 'lr': args.base_lr * args.lr_factor},
             {'params': pos_decoder.parameters()},
             {'params': neg_decoder.parameters()},
-            {'params': regressor_delta.parameters()},
+            {'params': pos_regressor_delta.parameters()},
+            {'params': neg_regressor_delta.parameters()},
             {'params': dual_attribution.parameters()}
         ], lr=args.base_lr, weight_decay=args.weight_decay)
     else:
@@ -114,7 +116,7 @@ def build_opti_sche(base_model, pos_decoder, neg_decoder, regressor_delta, dual_
     return optimizer, scheduler
 
 
-def resume_train(base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution, optimizer, args):
+def resume_train(base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution, optimizer, args):
     """Resume training from checkpoint."""
     ckpt_path = os.path.join(args.experiment_path, 'last.pth')
     if not os.path.exists(ckpt_path):
@@ -135,8 +137,11 @@ def resume_train(base_model, pos_decoder, neg_decoder, regressor_delta, dual_att
     neg_decoder_ckpt = {k.replace("module.", ""): v for k, v in state_dict['neg_decoder'].items()}
     neg_decoder.load_state_dict(neg_decoder_ckpt)
 
-    regressor_delta_ckpt = {k.replace("module.", ""): v for k, v in state_dict['regressor_delta'].items()}
-    regressor_delta.load_state_dict(regressor_delta_ckpt)
+    pos_regressor_delta_ckpt = {k.replace("module.", ""): v for k, v in state_dict['pos_regressor_delta'].items()}
+    pos_regressor_delta.load_state_dict(pos_regressor_delta_ckpt)
+
+    neg_regressor_delta_ckpt = {k.replace("module.", ""): v for k, v in state_dict['neg_regressor_delta'].items()}
+    neg_regressor_delta.load_state_dict(neg_regressor_delta_ckpt)
 
     dual_attribution_ckpt = {k.replace("module.", ""): v for k, v in state_dict['dual_attribution'].items()}
     dual_attribution.load_state_dict(dual_attribution_ckpt)
@@ -154,7 +159,7 @@ def resume_train(base_model, pos_decoder, neg_decoder, regressor_delta, dual_att
     return start_epoch, epoch_best_aqa, rho_best, L2_min, RL2_min
 
 
-def load_model(base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution, args):
+def load_model(base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution, args):
     """Load model from checkpoint for testing."""
     ckpt_path = args.ckpts
     if not os.path.exists(ckpt_path):
@@ -174,8 +179,11 @@ def load_model(base_model, pos_decoder, neg_decoder, regressor_delta, dual_attri
     neg_decoder_ckpt = {k.replace("module.", ""): v for k, v in state_dict['neg_decoder'].items()}
     neg_decoder.load_state_dict(neg_decoder_ckpt)
 
-    regressor_delta_ckpt = {k.replace("module.", ""): v for k, v in state_dict['regressor_delta'].items()}
-    regressor_delta.load_state_dict(regressor_delta_ckpt)
+    pos_regressor_delta_ckpt = {k.replace("module.", ""): v for k, v in state_dict['pos_regressor_delta'].items()}
+    pos_regressor_delta.load_state_dict(pos_regressor_delta_ckpt)
+
+    neg_regressor_delta_ckpt = {k.replace("module.", ""): v for k, v in state_dict['neg_regressor_delta'].items()}
+    neg_regressor_delta.load_state_dict(neg_regressor_delta_ckpt)
 
     dual_attribution_ckpt = {k.replace("module.", ""): v for k, v in state_dict['dual_attribution'].items()}
     dual_attribution.load_state_dict(dual_attribution_ckpt)

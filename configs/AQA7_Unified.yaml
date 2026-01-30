@@ -26,14 +26,14 @@ lr_factor: 0.1
 
 # Dual-branch attribution hyperparameters
 lambda_pos: 1              # Weight for positive quality contribution
-lambda_neg: 0.5              # Weight for negative quality contribution
+lambda_neg: 0.3              # Weight for negative quality contribution
 weight_regression: 1        # Weight for regression loss
 weight_attribution: 1      # Weight for total attribution regularization
-weight_orthogonality: 0.5    # Weight for orthogonality loss
+weight_orthogonality: 0.2    # Weight for orthogonality loss
 weight_sparsity: 0.01        # Weight for sparsity loss
 weight_smoothness: 0.1     # Weight for smoothness loss
-weight_global_contrastive: 0.5 # Weight for global contrastive regression loss
-weight_pairwise_ranking: 0.5   # Weight for pairwise ranking loss
+weight_global_contrastive: 0.2 # Weight for global contrastive regression loss
+weight_pairwise_ranking: 0.2   # Weight for pairwise ranking loss
 
 attribution_start_epoch: 50  # Epoch to start applying attribution losses
 

@@ -44,7 +44,8 @@ def model_builder(args):
     base_model.load_pretrain(args.pretrained_i3d_weight)
     PSNet_model = PSNet(n_channels=9)
     Decoder_vit = decoder_fuser(dim=64, num_heads=8, num_layers=3)
-    Regressor_delta = MLP_score(in_channel=64, out_channel=1)
+    posRegressor_delta = MLP_score(in_channel=64, out_channel=1)
+    negRegressor_delta = MLP_score(in_channel=64, out_channel=1)
 
     # Check if dataset has action segmentation labels
     has_segmentation = getattr(args, 'has_segmentation', True)
@@ -62,13 +63,14 @@ def model_builder(args):
         neg_attr_head = None
         neg_quality_agg = None
 
-    return base_model, PSNet_model, Decoder_vit, Regressor_delta, neg_attr_head, neg_quality_agg, pos_attr_head, pos_quality_agg
+    return base_model, PSNet_model, Decoder_vit, posRegressor_delta, negRegressor_delta, neg_attr_head, neg_quality_agg, pos_attr_head, pos_quality_agg
 
-def build_opti_sche(base_model, psnet_model, decoder, regressor_delta, neg_attr_head, neg_quality_agg, pos_attr_head, pos_quality_agg, args):
+def build_opti_sche(base_model, psnet_model, decoder, pos_regressor_delta, neg_regressor_delta, neg_attr_head, neg_quality_agg, pos_attr_head, pos_quality_agg, args):
     param_groups = [
         {'params': base_model.parameters(), 'lr': args.base_lr * args.lr_factor},
         {'params': decoder.parameters()},
-        {'params': regressor_delta.parameters()}
+        {'params': pos_regressor_delta.parameters()},
+        {'params': neg_regressor_delta.parameters()}
     ]
 
     # Add PSNet parameters only if using segmentation

@@ -17,7 +17,7 @@ sys.path.append(os.path.join(BASE_DIR, "../"))
 
 
 def unified_network_forward_train(
-    base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+    base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
     pred_scores, video_1, label_1_score, video_2, label_2_score,
     criterion, optimizer, epoch, batch_idx, batch_num, args
 ):
@@ -97,7 +97,7 @@ def unified_network_forward_train(
 
     ############# Fine-grained Contrastive Regression #############
     pos_decoder_12_21 = torch.cat((pos_decoder_video_12, pos_decoder_video_21), 0)
-    pos_delta = regressor_delta(pos_decoder_12_21.transpose(1, 2))
+    pos_delta = pos_regressor_delta(pos_decoder_12_21.transpose(1, 2))
     pos_delta = pos_delta.mean(1)
 
 
@@ -107,7 +107,7 @@ def unified_network_forward_train(
 
     # ############# Fine-grained Contrastive Regression #############
     neg_decoder_12_21 = torch.cat((neg_decoder_video_12, neg_decoder_video_21), 0)
-    neg_delta = regressor_delta(neg_decoder_12_21.transpose(1, 2))
+    neg_delta = neg_regressor_delta(neg_decoder_12_21.transpose(1, 2))
     neg_delta = neg_delta.mean(1)
 
 
@@ -176,7 +176,7 @@ def unified_network_forward_train(
 
 
 def unified_network_forward_test(
-    base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+    base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
     pred_scores, video_1, video_2_list, label_2_score_list, args
 ):
     """
@@ -252,7 +252,7 @@ def unified_network_forward_test(
 
         ############# Fine-grained Contrastive Regression #############
         pos_decoder_12_21 = torch.cat((pos_decoder_video_12, pos_decoder_video_21), 0)
-        pos_delta = regressor_delta(pos_decoder_12_21.transpose(1, 2))
+        pos_delta = pos_regressor_delta(pos_decoder_12_21.transpose(1, 2))
         pos_delta = pos_delta.mean(1)
 
 
@@ -262,7 +262,7 @@ def unified_network_forward_test(
 
         # ############# Fine-grained Contrastive Regression #############
         neg_decoder_12_21 = torch.cat((neg_decoder_video_12, neg_decoder_video_21), 0)
-        neg_delta = regressor_delta(neg_decoder_12_21.transpose(1, 2))
+        neg_delta = neg_regressor_delta(neg_decoder_12_21.transpose(1, 2))
         neg_delta = neg_delta.mean(1)
 
 
@@ -285,7 +285,7 @@ def unified_network_forward_test(
     pred_scores.extend([i.item() / len(video_2_list) for i in score])
 
 
-def save_checkpoint(base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+def save_checkpoint(base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
                     optimizer, epoch, epoch_best_aqa, rho_best, L2_min, RL2_min,
                     prefix, args):
     """
@@ -309,7 +309,8 @@ def save_checkpoint(base_model, pos_decoder, neg_decoder, regressor_delta, dual_
         'base_model': base_model.state_dict(),
         'pos_decoder': pos_decoder.state_dict(),
         'neg_decoder': neg_decoder.state_dict(),
-        'regressor_delta': regressor_delta.state_dict(),
+        'pos_regressor_delta': pos_regressor_delta.state_dict(),
+        'neg_regressor_delta': neg_regressor_delta.state_dict(),
         'dual_attribution': dual_attribution.state_dict(),
         'optimizer': optimizer.state_dict(),
         'epoch': epoch,
