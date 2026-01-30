@@ -95,7 +95,8 @@ def unified_train_net(args):
         base_model.train()
         pos_decoder.train()
         neg_decoder.train()
-        regressor_delta.train()
+        pos_regressor_delta.train()
+        neg_regressor_delta.train()
         dual_attribution.train()
 
         if args.fix_bn:
@@ -134,7 +135,7 @@ def unified_train_net(args):
 
         # Save checkpoint
         unified_helper.save_checkpoint(
-            base_model, pos_decoder, neg_decoder, regressor_delta, dual_attribution,
+            base_model, pos_decoder, neg_decoder, pos_regressor_delta, neg_regressor_delta, dual_attribution,
             optimizer, epoch, epoch_best_aqa, rho_best, L2_min, RL2_min,
             'last', args
         )
