@@ -92,22 +92,22 @@ def unified_network_forward_train(
     neg_video_2_fea_decoder = neg_features_2.transpose(1, 2)  # [B, 9, 1024]
 
     # ############# Direct Cross-attention (no PSNet) #############
-    # pos_decoder_video_12 = pos_decoder(pos_video_1_fea_decoder, pos_video_2_fea_decoder)
-    # pos_decoder_video_21 = pos_decoder(pos_video_2_fea_decoder, pos_video_1_fea_decoder)
+    pos_decoder_video_12 = pos_decoder(pos_video_1_fea_decoder, pos_video_2_fea_decoder)
+    pos_decoder_video_21 = pos_decoder(pos_video_2_fea_decoder, pos_video_1_fea_decoder)
 
     ############# Fine-grained Contrastive Regression #############
-    # pos_decoder_12_21 = torch.cat((pos_decoder_video_12, pos_decoder_video_21), 0)
-    pos_delta = regressor_delta(pos_video_1_fea_decoder.transpose(1, 2))
+    pos_decoder_12_21 = torch.cat((pos_decoder_video_12, pos_decoder_video_21), 0)
+    pos_delta = regressor_delta(pos_decoder_12_21.transpose(1, 2))
     pos_delta = pos_delta.mean(1)
 
 
     ############# Direct Cross-attention (no PSNet) #############
-    # neg_decoder_video_12 = neg_decoder(neg_video_1_fea_decoder, neg_video_2_fea_decoder)
-    # neg_decoder_video_21 = neg_decoder(neg_video_2_fea_decoder, neg_video_1_fea_decoder)
+    neg_decoder_video_12 = neg_decoder(neg_video_1_fea_decoder, neg_video_2_fea_decoder)
+    neg_decoder_video_21 = neg_decoder(neg_video_2_fea_decoder, neg_video_1_fea_decoder)
 
     # ############# Fine-grained Contrastive Regression #############
-    # neg_decoder_12_21 = torch.cat((neg_decoder_video_12, neg_decoder_video_21), 0)
-    neg_delta = regressor_delta(neg_video_1_fea_decoder.transpose(1, 2))
+    neg_decoder_12_21 = torch.cat((neg_decoder_video_12, neg_decoder_video_21), 0)
+    neg_delta = regressor_delta(neg_decoder_12_21.transpose(1, 2))
     neg_delta = neg_delta.mean(1)
 
 
@@ -118,14 +118,14 @@ def unified_network_forward_train(
 
     # Modified score: base_score + lambda_pos * pos_contribution - lambda_neg * neg_contribution
     # For contrastive regression, we compute the delta
-    # score_1 = pos_delta[:pos_delta.shape[0]//2] \
-    #            - lambda_neg * neg_delta[:neg_delta.shape[0]//2]
-    # score_2 = pos_delta[pos_delta.shape[0]//2:] \
-    #            - lambda_neg * neg_delta[neg_delta.shape[0]//2:]
-    score_1 = pos_delta \
-               - lambda_neg * neg_delta
-    score_2 = pos_delta \
-               - lambda_neg * neg_delta
+    score_1 = pos_delta[:pos_delta.shape[0]//2] \
+               - lambda_neg * neg_delta[:neg_delta.shape[0]//2]
+    score_2 = pos_delta[pos_delta.shape[0]//2:] \
+               - lambda_neg * neg_delta[neg_delta.shape[0]//2:]
+    # score_1 = pos_delta \
+    #            - lambda_neg * neg_delta
+    # score_2 = pos_delta \
+    #            - lambda_neg * neg_delta
 
     # # Compute loss
     # # Regression loss
@@ -146,12 +146,12 @@ def unified_network_forward_train(
     loss_dict = criterion(
         predictions=score_1.squeeze(),
         targets=label_1_score.squeeze(),
-        pos_features=pos_features_1,
-        neg_features=neg_features_1,
-        pos_attrs=pos_attrs_1,
-        neg_attrs=neg_attrs_1,
-        pos_scores=pos_score_1,
-        neg_scores=neg_score_1,
+        pos_features=torch.cat([pos_features_1, pos_features_2], 0),
+        neg_features=torch.cat([neg_features_1, neg_features_2], 0),
+        pos_attrs=torch.cat([pos_attrs_1, pos_attrs_2], 0),
+        neg_attrs=torch.cat([neg_attrs_1, neg_attrs_2], 0),
+        pos_scores=torch.cat([pos_score_1, pos_score_2], 0),
+        neg_scores=torch.cat([neg_score_1, neg_score_2], 0),
         epoch=epoch
     )
 
@@ -164,6 +164,7 @@ def unified_network_forward_train(
 
     # Store predictions
     pred_scores.extend([i.item() for i in score_1.detach()])
+
 
     if batch_idx % args.print_freq == 0:
         print('[Training][%d/%d][%d/%d] \t Batch_time: %.2f \t Loss: %.4f \t '
@@ -245,23 +246,23 @@ def unified_network_forward_test(
         neg_video_1_fea_decoder = neg_features_1.transpose(1, 2)  # [B, 9, 1024]
         neg_video_2_fea_decoder = neg_features_2.transpose(1, 2)  # [B, 9, 1024]
 
-        # ############# Direct Cross-attention (no PSNet) #############
-        # pos_decoder_video_12 = pos_decoder(pos_video_1_fea_decoder, pos_video_2_fea_decoder)
-        # pos_decoder_video_21 = pos_decoder(pos_video_2_fea_decoder, pos_video_1_fea_decoder)
+        ############# Direct Cross-attention (no PSNet) #############
+        pos_decoder_video_12 = pos_decoder(pos_video_1_fea_decoder, pos_video_2_fea_decoder)
+        pos_decoder_video_21 = pos_decoder(pos_video_2_fea_decoder, pos_video_1_fea_decoder)
 
         ############# Fine-grained Contrastive Regression #############
-        # pos_decoder_12_21 = torch.cat((pos_decoder_video_12, pos_decoder_video_21), 0)
-        pos_delta = regressor_delta(pos_video_1_fea_decoder.transpose(1, 2))
+        pos_decoder_12_21 = torch.cat((pos_decoder_video_12, pos_decoder_video_21), 0)
+        pos_delta = regressor_delta(pos_decoder_12_21.transpose(1, 2))
         pos_delta = pos_delta.mean(1)
 
 
         ############# Direct Cross-attention (no PSNet) #############
-        # neg_decoder_video_12 = neg_decoder(neg_video_1_fea_decoder, neg_video_2_fea_decoder)
-        # neg_decoder_video_21 = neg_decoder(neg_video_2_fea_decoder, neg_video_1_fea_decoder)
+        neg_decoder_video_12 = neg_decoder(neg_video_1_fea_decoder, neg_video_2_fea_decoder)
+        neg_decoder_video_21 = neg_decoder(neg_video_2_fea_decoder, neg_video_1_fea_decoder)
 
         # ############# Fine-grained Contrastive Regression #############
-        # neg_decoder_12_21 = torch.cat((neg_decoder_video_12, neg_decoder_video_21), 0)
-        neg_delta = regressor_delta(neg_video_1_fea_decoder.transpose(1, 2))
+        neg_decoder_12_21 = torch.cat((neg_decoder_video_12, neg_decoder_video_21), 0)
+        neg_delta = regressor_delta(neg_decoder_12_21.transpose(1, 2))
         neg_delta = neg_delta.mean(1)
 
 
@@ -276,8 +277,10 @@ def unified_network_forward_test(
         #            - lambda_neg * neg_delta[:neg_delta.shape[0]//2]
         # score_2 = pos_delta[pos_delta.shape[0]//2:] \
         #            - lambda_neg * neg_delta[neg_delta.shape[0]//2:]
-        score += pos_delta \
-                - lambda_neg * neg_delta
+        # score += pos_delta \
+        #         - lambda_neg * neg_delta
+        score += pos_delta[:pos_delta.shape[0]//2] \
+               - lambda_neg * neg_delta[:neg_delta.shape[0]//2]
 
     pred_scores.extend([i.item() / len(video_2_list) for i in score])
 

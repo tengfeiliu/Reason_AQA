@@ -78,7 +78,7 @@ def unified_model_builder(args):
         input_dim=1024,
         hidden_dim=1024,
         temporal_length=getattr(args, 'frame_length', 96),
-        dropout=0.5,
+        dropout=0.3,
         use_gating=True
     )
 
