@@ -49,7 +49,8 @@ def unified_train_net(args):
         base_model = base_model.cuda()
         pos_decoder = pos_decoder.cuda()
         neg_decoder = neg_decoder.cuda()
-        regressor_delta = regressor_delta.cuda()
+        pos_regressor_delta = pos_regressor_delta.cuda()
+        neg_regressor_delta = neg_regressor_delta.cuda()
         dual_attribution = dual_attribution.cuda()
         criterion = criterion.cuda()
         torch.backends.cudnn.benchmark = True
